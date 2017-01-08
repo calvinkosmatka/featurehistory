@@ -10,7 +10,7 @@ class Distance(object):
 		return 0
 
 
-class Character(object, Distance):
+class Character(Distance):
 	def __init__(self, char):
 		self._char = char
 	def d(self, other):
@@ -18,7 +18,7 @@ class Character(object, Distance):
 			return 0
 		return 1
 
-class Sequence(object, Distance):
+class Sequence(Distance):
 	def __init__(self, string, chartype):
 		self._seq = [chartype.__init__(x) for x in string]
 	def d(self, other):
@@ -27,7 +27,7 @@ class Sequence(object, Distance):
 			s += c1.d(c2)
 		return s
 
-class Align(object, Distance):
+class Align(Distance):
 	"""An object representing an aligned pair of sequences"""
 	def __init__(self, seq1, seq2):
 		self._s1 = seq1
