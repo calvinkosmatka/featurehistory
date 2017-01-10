@@ -14,8 +14,20 @@ def readAlignedFile(filename):
 	meanings = wb.get_sheet_names()
 	firstsheet = wb.get_sheet_by_name(meanings[0])
 	numlangs = firstsheet.max_row-1
-	languages = [x[0].value for x in firstsheet['A2':'A{}'.format(numlangs+1)]]
-	print(languages)
+	languagenames = [x[0].value for x in firstsheet['A2':'A{}'.format(numlangs+1)]]
+	languages = LanguageFamily()
+	llist = []
+	for i in range(len(languagenames)):
+		llist.append(Language(languagenames[i]))
+		for j in range(len(meanings)):
+			word = []
+			for k in range(2, len(wb[j].columns())+1):
+				word.append(wb[j].cell(row=i+2, col=k).value)
+			llist[i].addAlignedWord(word, meanings[j])
+	for lang in llist:
+		langugages.addLanguage(lang)
+	print(dir(languages))
+		
 	
 
 

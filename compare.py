@@ -72,9 +72,9 @@ class Segment(Character):
 		
 
 class Word(Sequence):
-	def __init__(self, word):
-		super().__init__(self, unicodedata.normalize('NFD',word), Segment)
-	
+	def __init__(self, segments, meaning):
+		super().__init__(self, unicodedata.normalize('NFD',segments), Segment)
+		self.meaning = meaning
 	def setCognacyClass(self, c):
 		self._cognacyclass = c
 	def getCognacyClass(self):
@@ -83,11 +83,17 @@ class Word(Sequence):
 class Language:
 	"""contains words and meanings"""
 	def __init__(self):
-		pass
+		self.words = []
+	def addAlignedWord(self, seq, meaning):
+		self.words.append(Word(seq, meaning))
 
 class LanguageFamily:
 	"""contains languages with words matching meanings"""
 	def __init__(self):
-		pass
-
+		self.languages = []
+	def addLanguage(self, lang):
+		if isinstance(lang, Language):
+			self.languages.append(lang)
+		if isinstance(lang, str):
+			self.languages.append(Language
 
