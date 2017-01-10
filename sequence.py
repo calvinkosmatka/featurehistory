@@ -20,12 +20,16 @@ class Character(Distance):
 
 class Sequence(Distance):
 	def __init__(self, string, chartype):
-		self._seq = [chartype.__init__(x) for x in string]
+		self._seq = [chartype(x) for x in string]
+		self.string = string
+		self.chartype = chartype
 	def d(self, other):
 		s = 0
 		for (c1, c2) in Align(self, other):
 			s += c1.d(c2)
 		return s
+	def __repr__(self):
+		return str(self._seq)
 
 class Align(Distance):
 	"""An object representing an aligned pair of sequences"""

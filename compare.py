@@ -1,5 +1,6 @@
 from sequence import Distance, Character, Sequence, Align
 import unicodedata
+from tabulate import tabulate
 
 class Segment(Character):
 	"""Order of features:
@@ -52,7 +53,7 @@ class Segment(Character):
 	"d": 1,
 	"g": 1,
 	"m": 1,
-	"n": 1,
+	"n": "0110100011100000000",
 	"ŋ": 1,
 	"ʔ": 1,
 	"s": 1,
@@ -73,17 +74,22 @@ class Segment(Character):
 
 class Word(Sequence):
 	def __init__(self, segments, meaning):
-		super().__init__(self, unicodedata.normalize('NFD',segments), Segment)
+		for i in range(len(segments)):
+			if segments[i]==None:
+				segments[i]=" "
+		super().__init__(segments, Segment)
 		self.meaning = meaning
 	def setCognacyClass(self, c):
 		self._cognacyclass = c
 	def getCognacyClass(self):
 		return self._cognacyclass
-	
+	def __repr__(self):
+		return "".join(self.string)+" : "+self.meaning	
 class Language:
 	"""contains words and meanings"""
-	def __init__(self):
+	def __init__(self, name):
 		self.words = []
+		self.name = name
 	def addAlignedWord(self, seq, meaning):
 		self.words.append(Word(seq, meaning))
 
@@ -95,5 +101,17 @@ class LanguageFamily:
 		if isinstance(lang, Language):
 			self.languages.append(lang)
 		if isinstance(lang, str):
-			self.languages.append(Language
-
+			self.languages.append(Language(lang))
+	def setMeanings(self, meanings):
+		self.meanings = meanings
+	def getMeanings(self):
+		return self.meanings
+	def __repr__(self):
+		headers = ["Language", *self.meanings]
+		rows = []
+		for l in self.languages:
+			r = [l.name]
+			for word in l.words:
+				r.append("".join(word.string))
+			rows.append(r)
+		return tabulate(rows, headers=headers)

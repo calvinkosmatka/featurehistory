@@ -21,17 +21,18 @@ def readAlignedFile(filename):
 		llist.append(Language(languagenames[i]))
 		for j in range(len(meanings)):
 			word = []
-			for k in range(2, len(wb[j].columns())+1):
-				word.append(wb[j].cell(row=i+2, col=k).value)
+			for k in range(3,wb.worksheets[j].max_column):
+				word.append(wb.worksheets[j].cell(row=i+2, column=k).value)
 			llist[i].addAlignedWord(word, meanings[j])
+			print(llist[i].words[j])
 	for lang in llist:
-		langugages.addLanguage(lang)
-	print(dir(languages))
-		
+		languages.addLanguage(lang)
+	languages.setMeanings(meanings)
+	return languages
 	
 
 
 if __name__=="__main__":
-	readAlignedFile(sys.argv[1])	
+	print(readAlignedFile(sys.argv[1]))	
 	x = Segment("p")
 	print(x)
