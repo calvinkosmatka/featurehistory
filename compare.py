@@ -46,31 +46,55 @@ class Segment(Character):
 	'distributed'
 	]
 	featuredict = {
+	#     scsacbhlnvcrsldascd
 	"p": "0101000000000000000",
-	"t": "001010100",
-	"k": "101001010",
-	"b": "101111110",
-	"d": 1,
-	"g": 1,
+	"t": "0101100000000000000",
+	"k": "0100011000000000000",
+	"b": "0101000001000000000",
+	"d": "0101100001000000000",
+	"g": "0100011001000000000",
 	"m": 1,
-	"n": "0110100011100000000",
-	"ŋ": 1,
-	"ʔ": 1,
-	"s": 1,
-	"z": 1,
+	"n": "0111100011000000000",
+	"ŋ": "0110011011000000000",
+	"ŋ̩": "0110011011000000000",
+	"ʔ": "0000000000000000000",
+	"h": "0000000000100000000",
+	"s": "0101100000101000000",
+	"z": "0101100001101000000",
+	"ʃ": "0100101000101000000",
 	"f": 1,
-	"v": 1
-	
+	"v": 1,
+	"x": "0100011000100000000",
+	"ɣ": "0100011001100000000",
+	"j": "0010101001100000000",
+	"r": "0111100001100000000",
+	"ʁ": "0100010001100000000",
+	"ʁ̞": "0110010001100000000",
+	"ɹ": "0111100001100000000",
+	"χ": "0100010000100000000",
+	"ɾ": "0111100001100000000",
+	"θ": "0101100000100000000",
+	"tʰ":"0101100000000000100",
+	"ʰt":"0101100000000000100",
+	"ç": "0100101000101000000",
+	"ç": "0100101000101000000", 
+	"k̟ʰ":"0100011000000000100",
+	"kʰ":"0100011000000000100",
+	"w": "0010011001110000000",
+	"l": "0111100001100100000",
+	" ": "-------------------"	
 	}
 	def d(self, other):
 		return 0
 	def __repr__(self):
 		string = ""
-		print(Segment.featuredict[self._char])
+		string += "/{}/\n".format(self._char)
 		for i in range(len(Segment.features)):
 			string += "["+("-" if Segment.featuredict[self._char][i]=="0" else "+")+Segment.features[i]+"]\n"
 		return string
-		
+	def getBinary(self):
+		print(self._char)
+		return Segment.featuredict[self._char]	
 
 class Word(Sequence):
 	def __init__(self, segments, meaning):
@@ -85,6 +109,11 @@ class Word(Sequence):
 		return self._cognacyclass
 	def __repr__(self):
 		return "".join(self.string)+" : "+self.meaning	
+	def getBinary(self):
+		string = ""
+		for s in self._seq:
+			string += s.getBinary()
+		return string	
 class Language:
 	"""contains words and meanings"""
 	def __init__(self, name):
@@ -115,3 +144,17 @@ class LanguageFamily:
 				r.append("".join(word.string))
 			rows.append(r)
 		return tabulate(rows, headers=headers)
+	def writeNexusStub(self, fil):
+		"""
+		fil is a uri pointing to the deired output file
+		clears file before writing
+		"""
+		f = open(fil, "w")
+		numchars = 0 #fix this
+		f.write("ntaxa = {0}, nchar = {1}\n".format(len(self.languages), numchars)) 
+		for lang in self.languages:
+			f.write(lang.name + "\t\t")
+			for word in lang.words:
+				f.write(word.getBinary())
+			f.write("\n")
+		f.close()

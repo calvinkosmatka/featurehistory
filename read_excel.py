@@ -10,7 +10,6 @@ def readAlignedFile(filename):
 	"""return aligned language family object"""
 	"""assumes that the file is structured properly"""
 	wb = openpyxl.load_workbook(filename, read_only=True)
-	print(wb.get_sheet_names())	
 	meanings = wb.get_sheet_names()
 	firstsheet = wb.get_sheet_by_name(meanings[0])
 	numlangs = firstsheet.max_row-1
@@ -24,7 +23,6 @@ def readAlignedFile(filename):
 			for k in range(3,wb.worksheets[j].max_column):
 				word.append(wb.worksheets[j].cell(row=i+2, column=k).value)
 			llist[i].addAlignedWord(word, meanings[j])
-			print(llist[i].words[j])
 	for lang in llist:
 		languages.addLanguage(lang)
 	languages.setMeanings(meanings)
@@ -33,6 +31,9 @@ def readAlignedFile(filename):
 
 
 if __name__=="__main__":
-	print(readAlignedFile(sys.argv[1]))	
+	fam = readAlignedFile(sys.argv[1])
+	print(fam)
+	fam.writeNexusStub(sys.argv[2])
+	
 	x = Segment("p")
 	print(x)
