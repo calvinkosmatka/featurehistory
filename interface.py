@@ -11,8 +11,8 @@ class CompareSuite(cmd.Cmd):
 	def do_list(self, arg):
 		'List some properties of the language family'
 		if arg == "languages":
-			for lang in self.languagefamily.languages:
-				print(lang.name)
+			for i in range(len(self.languagefamily.languages)):
+				print(str(i) + ") " + self.languagefamily.languages[i].name)
 		if arg == "meanings":
 			for m in self.languagefamily.meanings:
 				print(m)
@@ -24,6 +24,18 @@ class CompareSuite(cmd.Cmd):
 		m = self.languagefamily.distanceMatrix()
 		for x in m:
 			print(x)
+	def do_correspondence(self, arg):
+		args = arg.split(" ")
+		print(args)
+		l1 = self.languagefamily.languages[int(args[0])]
+		l2 = self.languagefamily.languages[int(args[1])]
+		scm = l1.buildCorrespondenceMatrix(l2)
+		print("Correspondence matrix for " + l1.name + "->" + l2.name)
+		print("p(" + l1.name + "," + l2.name + ") = " + str(l1.correspondenceProbability(l2)))
+		print("d(" + l1.name + "," + l2.name + ") = " + str(l1.d(l2)))
+		print("  \t" + "  ".join(l2.phones))
+		for i in range(len(scm)):
+			print(l1.phones[i] + "\t" + str(scm[i]))
 	def do_quit(self, arg):
 		return True
 
