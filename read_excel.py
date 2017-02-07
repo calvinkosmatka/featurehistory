@@ -33,7 +33,12 @@ def readAlignedFile(filename):
 if __name__=="__main__":
 	fam = readAlignedFile(sys.argv[1])
 	print(fam)
-	fam.writeNexusStub(sys.argv[2])
-	
+	l1 = fam.languages[8]
+	l2 = fam.languages[9]
+	scm = l1.buildCorrespondenceMatrix(l2)
+	print("  " + "  ".join(l2.phones))
+	for i in range(len(scm)):
+		print(l1.phones[i] + str(scm[i]))
+	print(l1.correspondenceProbability(l2))
 	x = Segment("p")
 	print(x)

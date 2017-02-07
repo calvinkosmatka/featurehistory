@@ -1,6 +1,7 @@
 from sequence import Distance, Character, Sequence, Align
 import unicodedata
 from tabulate import tabulate
+from functools import reduce
 
 class Segment(Character):
 	"""Order of features:
@@ -113,15 +114,38 @@ class Word(Sequence):
 		string = ""
 		for s in self._seq:
 			string += s.getBinary()
-		return string	
+		return string
+		# "".join([s.getBinary() for s in self._seq])	
 class Language:
 	"""contains words and meanings"""
 	def __init__(self, name):
 		self.words = []
 		self.name = name
 	def addAlignedWord(self, seq, meaning):
+		#TODO distinguish between non-aligned and aligned words
+		# Should only be thought about after I have alignment algorithm
 		self.words.append(Word(seq, meaning))
-
+		
+		#rebuild list of phones every time we add a word
+		self.phones = list(set([ word.string[i] for word in self.words for i in range(len(word.string))]))
+		
+	def buildCorrespondenceMatrix(self, otherlang):
+		matrix = [[0 for p in otherlang.phones] for q in self.phones]
+		for i in range(len(self.words)):
+			for j in range(len(self.words[i].string)):
+			#implicit assumption that the words have the same length
+				s1 = self.words[i].string[j]
+				s2 = otherlang.words[i].string[j]
+				matrix[self.phones.index(s1)][otherlang.phones.index(s2)] += 1
+		return matrix
+	def correspondenceProbability(self, otherlang):
+		scm = self.buildCorrespondenceMatrix(otherlang)
+		prod = 1
+		for row in scm:
+			l = [(x/sum(row))**x for x in row]
+			v = reduce(lambda x, y: x*y, l)
+			prod *= v
+		return prod
 class LanguageFamily:
 	"""contains languages with words matching meanings"""
 	def __init__(self):
