@@ -2,6 +2,7 @@ from sequence import Distance, Character, Sequence, Align
 import unicodedata
 from tabulate import tabulate
 from functools import reduce
+import math
 
 class Segment(Character):
 	"""Order of features:
@@ -146,6 +147,8 @@ class Language:
 			v = reduce(lambda x, y: x*y, l)
 			prod *= v
 		return prod
+	def d(self, otherlang):
+		return -math.log(self.correspondenceProbability(otherlang))
 class LanguageFamily:
 	"""contains languages with words matching meanings"""
 	def __init__(self):
@@ -170,7 +173,7 @@ class LanguageFamily:
 		return tabulate(rows, headers=headers)
 	def writeNexusStub(self, fil):
 		"""
-		fil is a uri pointing to the deired output file
+		fil is a uri pointing to the desired output file
 		clears file before writing
 		"""
 		f = open(fil, "w")
@@ -182,3 +185,10 @@ class LanguageFamily:
 				f.write(word.getBinary())
 			f.write("\n")
 		f.close()
+	def distanceMatrix(self):
+		matrix = [[0 for _ in self.languages] for _ in self.languages]
+		for i in range(len(self.languages)):
+			for j in range(i, len(self.languages)):
+				if i!=j:
+					matrix[i][j] = self.languages[i].d(self.languages[j])
+		return matrix
