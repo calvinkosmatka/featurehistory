@@ -3,6 +3,8 @@ import unicodedata
 from tabulate import tabulate
 from functools import reduce
 import math
+from Bio import Phylo
+from Bio.Phylo import TreeConstruction
 
 class Segment(Character):
 	"""Order of features:
@@ -49,6 +51,60 @@ class Segment(Character):
 	]
 	featuredict = {
 	#     scsacbhlnvcrsldascd
+	"p": "0101000000000000000",
+	"t": "0101100000000000000",
+	"k": "0100011000000000000",
+	"b": "0101000001000000000",
+	"d": "0101100001000000000",
+	"g": "0100011001000000000",
+	"m": 1,
+	"n": "0111100011000000000",
+	"ŋ": "0110011011000000000",
+	"ŋ̩": "0110011011000000000",
+	"ʔ": "0000000000000000000",
+	"h": "0000000000100000000",
+	"s": "0101100000101000000",
+	"z": "0101100001101000000",
+	"ʃ": "0100101000101000000",
+	"f": 1,
+	"v": 1,
+	"x": "0100011000100000000",
+	"ɣ": "0100011001100000000",
+	"j": "0010101001100000000",
+	"r": "0111100001100000000",
+	"ʁ": "0100010001100000000",
+	"ʁ̞": "0110010001100000000",
+	"ɹ": "0111100001100000000",
+	"χ": "0100010000100000000",
+	"ɾ": "0111100001100000000",
+	"θ": "0101100000100000000",
+	"tʰ":"0101100000000000100",
+	"ʰt":"0101100000000000100",
+	"ç": "0100101000101000000",
+	"ç": "0100101000101000000", 
+	"k̟ʰ":"0100011000000001100",
+	"kʰ":"0100011000000000100",
+	"w": "0010011001110000000",
+	"l": "0111100001100100000",
+	" ": "-------------------"	
+	}
+	AIdimensions = [
+	'son',
+	'cons',
+	'GW',
+	'GT',
+	'LH',
+	'TR',
+	'SP',
+	'TH',
+	'TT',
+	'TC',
+	'TG',
+	'L',
+	'A'
+	]
+	AIfeaturedict = {
+	#     scwtltshtcgla
 	"p": "0101000000000000000",
 	"t": "0101100000000000000",
 	"k": "0100011000000000000",
@@ -141,14 +197,26 @@ class Language:
 		return matrix
 	def correspondenceProbability(self, otherlang):
 		scm = self.buildCorrespondenceMatrix(otherlang)
-		prod = 1
-		for row in scm:
-			l = [(x/sum(row))**x for x in row]
-			v = reduce(lambda x, y: x*y, l)
-			prod *= v
-		return prod
+		# ignore insertions/deletions for calculating distance
+		ignoreInsertions = False 
+		ignoreDeletions = False 
+		if ignoreInsertions:
+			scm.pop(self.phones.index(" "))
+		if ignoreDeletions:
+			j = otherlang.phones.index(" ")
+			for i in range(len(scm)):
+				scm[i].pop(j)
+		return correspondenceProbability(scm)
 	def d(self, otherlang):
 		return -math.log(self.correspondenceProbability(otherlang))
+def correspondenceProbability(matrix):
+	prod = 1
+	for row in matrix:
+		if sum(row)>0:
+			l = [(x/sum(row))**x for x in row]
+			v = reduce(lambda x,y: x*y, l)
+			prod *=v
+	return prod
 class LanguageFamily:
 	"""contains languages with words matching meanings"""
 	def __init__(self):
@@ -188,7 +256,41 @@ class LanguageFamily:
 	def distanceMatrix(self):
 		matrix = [[0 for _ in self.languages] for _ in self.languages]
 		for i in range(len(self.languages)):
-			for j in range(i, len(self.languages)):
+			for j in range(len(self.languages)):
 				if i!=j:
 					matrix[i][j] = self.languages[i].d(self.languages[j])
 		return matrix
+	def UPGMA(self, f=min):
+		"""builds a tree via UPGMA, and uses the passed in function to deal with asymmetric 'distances'"""
+		m = self.distanceMatrix()
+		for i in range(len(self.languages)):
+			for j in range(i, len(self.languages)):
+				m[i][j] = f(m[i][j],m[j][i])
+				m[j][i] = m[i][j]
+		predm = [[m[i][j] for j in range(i+1)] for i in range(len(self.languages))]
+	#	print(predm)
+		dm = TreeConstruction._DistanceMatrix([l.name for l in self.languages], predm)
+		constructor = TreeConstruction.DistanceTreeConstructor(method='upgma')
+		upgmatree = constructor.upgma(dm)
+		Phylo.draw_ascii(upgmatree)
+	#	indices = range(len(self.languages))
+	#	while len(indices)>1:
+	#		#find minimum distance in m
+	#	
+	#		#join indices as  tuple
+	#		#recalculate m
+			
+		return m
+	def NJ(self, f=min):
+		m = self.distanceMatrix()
+		for i in range(len(self.languages)):
+			for j in range(i, len(self.languages)):
+				m[i][j] = f(m[i][j],m[j][i])
+				m[j][i] = m[i][j]
+		predm = [[m[i][j] for j in range(i+1)] for i in range(len(self.languages))]
+	#	print(predm)
+		dm = TreeConstruction._DistanceMatrix([l.name for l in self.languages], predm)
+		constructor = TreeConstruction.DistanceTreeConstructor(method='nj')
+		njtree = constructor.nj(dm)
+		Phylo.draw_ascii(njtree)
+

@@ -36,6 +36,25 @@ class CompareSuite(cmd.Cmd):
 		print("  \t" + "  ".join(l2.phones))
 		for i in range(len(scm)):
 			print(l1.phones[i] + "\t" + str(scm[i]))
+	def do_UPGMA(self, arg):
+		if arg=="max":
+			x = self.languagefamily.UPGMA(max)
+		elif arg=="avg":
+			x = self.languagefamily.UPGMA(lambda x,y:x+y/2)
+		else:
+			x = self.languagefamily.UPGMA()
+		#for i in x:
+		#	print()
+	def do_NJ(self, arg):
+		if arg=="max":
+			x = self.languagefamily.NJ(max)
+		elif arg=="avg":
+			x = self.languagefamily.NJ(lambda x,y:x+y/2)
+		else:
+			x = self.languagefamily.NJ()	
+	def do_del(self, arg):
+		i = int(arg)
+		self.languagefamily.languages.pop(i)
 	def do_quit(self, arg):
 		return True
 
