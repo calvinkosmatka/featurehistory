@@ -103,6 +103,11 @@ class Segment(Character):
 	'L',
 	'A'
 	]
+	"""	0 means unspecified
+		1 neutral
+		2 high on AI chart
+		3 low on AI
+	"""
 	AIfeaturedict = {
 	#     scwtltshtcgla
 	"p": "0101000000000000000",
@@ -206,17 +211,24 @@ class Language:
 			j = otherlang.phones.index(" ")
 			for i in range(len(scm)):
 				scm[i].pop(j)
-		return correspondenceProbability(scm)
+		return correspondenceProbability(scm, "hypergeometric")
 	def d(self, otherlang):
 		return -math.log(self.correspondenceProbability(otherlang))
-def correspondenceProbability(matrix):
+def correspondenceProbability(matrix, dist="binomial"):
 	prod = 1
 	for row in matrix:
 		if sum(row)>0:
-			l = [(x/sum(row))**x for x in row]
-			v = reduce(lambda x,y: x*y, l)
-			prod *=v
+			if dist=="binomial":
+				l = [(x/sum(row))**x for x in row]
+				v = reduce(lambda x,y: x*y, l)
+				prod *= v
+			if dist=="hypergeometric":
+				l = [math.factorial(x) for x in row]
+				v = reduce(lambda x,y: x*y, l)
+				v = v/math.factorial(sum(row))
+				prod *= v
 	return prod
+
 class LanguageFamily:
 	"""contains languages with words matching meanings"""
 	def __init__(self):
